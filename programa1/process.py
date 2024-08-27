@@ -9,6 +9,6 @@ class Process:
         self.name = None
         self.pid = None
         self.operation = None
-        self.mte = None
+        self.met = None
         self.x = None
         self.y = None
