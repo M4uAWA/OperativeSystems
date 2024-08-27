@@ -20,7 +20,7 @@ tProcesses = int(input("ANS: "))
 batchQueue = Queue()
 auxProcess = Process()
 auxBatch = Batch(bS)
-tmte = 0
+tmet = 0
 
 i = 0
 while (tProcesses != 0):
@@ -31,7 +31,7 @@ while (tProcesses != 0):
         auxProcess.y = int(input("Operand 2: "))
         auxProcess.pid = i
         auxProcess.mte = int(input("Maximum estimated time: "))
-        tmte += auxProcess.mte
+        tmet += auxProcess.met
         
         auxBatch.processQueue.put(auxProcess) #Process enqueue
         
@@ -48,17 +48,11 @@ if(not auxBatch.processQueue.empty()): #Case - Queuing an incomplete batch
     print("Final Batch completed with spare space")
     batchQueue.put(auxBatch)
     
-for i in range(tmte):
-    print("Tiempo restante: ",tmte)
-    tmte -= 1
+#End of first part    
+
+for i in range(tmet):
+    print("Tiempo restante: ",tmet)
+    
+    tmet -= 1
     time.sleep(1)
-    
-    
-    
-
-
-
-
-
-        
-        
+            
