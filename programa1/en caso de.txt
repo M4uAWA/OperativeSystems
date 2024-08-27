@@ -1,0 +1,45 @@
+
+class Process:
+    def __init__(self):
+        self._name = None
+        self._pid = None
+        self._operation = None
+        self._mte = None
+        self._x = None
+        self._y = None
+        
+    def getName(self):
+        return self.name
+    
+    def setName(self, name):
+        self.name = name
+    
+    def getPid(self):
+        return self.pid
+    
+    def setPid(self, pid):
+        self.pid = pid
+        
+    def getOperation(self):
+        return self.operation
+    
+    def setOperation(self, operation):
+        self.operation = operation
+        
+    def getMte(self):
+        return self.mte
+    
+    def setMte(self, mte):
+        self.mte = mte
+    
+    def getX(self):
+        return self._x
+    
+    def setX(self, x):
+        self.x = x
+
+    def getY(self):
+        return self.y
+    
+    def setY(self, y):
+        self.y = y
