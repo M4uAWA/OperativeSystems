@@ -1,358 +1,331 @@
-# @title Programa 2 procesos generados automáticamente, id incremental, con ventanas submit
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Aug 25 18:58:33 2024
-
-@author: USER
-"""
-
 import random
 import tkinter as tk
 from tkinter import ttk
 from process import Process
 from batch import Batch
 from queue import Queue
+from ctypes import windll  # IMPROVE RESOLUTION
 
-from ctypes import windll #IMPROVE RESOLUTION
 windll.shcore.SetProcessDpiAwareness(1)
 
-#Batch size for this program
-bS = 5
-
-def windowFormat():
-    window = tk.Tk()
-    window.title("Operative system")
-    window.configure(background="#000000")
-    window.geometry("1080x720")
-    return window
-
-def labelFormat(master,text):
-    lbl = tk.Label(master, text=text, foreground='#d7c7ff', bg="#000000",justify=tk.CENTER, font=('Century Gothic',12))
-    return lbl
-
-def entryFormat(master,textVariable):
-    entry = tk.Entry(master, textvariable = textVariable, bg="#e1d7fa", font=('Century Gothic',11, 'bold'),justify=tk.CENTER)
-    return entry
-
-def submitC():
-    global entVar
-    entVar = int(txtVar.get())
-    window.destroy()
-  
-#for second program
-def processCapture(batchQueue,auxBatch,tNew,operators):
-    i = 0
-    while (tNew != 0):
-
-        auxProcess = Process()
-
-        name = "Process" + str(i+1)
-        meOma0 = int(random.randrange(1,2))
-        auxProcess.name = name
-        auxProcess.pid = i
-        auxProcess.x = int(random.randrange(-99,99))
-        auxProcess.operation = random.choice(operators)
+class OperativeSystemApp:
+    def __init__(self):
+        # initial config
+        self.bS = 5  # batch size
+        self.entVar = None
         
-        if(auxProcess.operation == "/" or auxProcess.operation == "%"):
-            if(meOma0 == 1):
-                auxProcess.y = int(random.randrange(1,99))
-            else:
-                auxProcess.y = int(random.randrange(-99,-1))
-        else:
-            auxProcess.y = int(random.randrange(-99,99))
-        auxProcess.met = int(random.randrange(5,25))
+        # processing variables
+        self.batchQueue = Queue()
+        self.auxBatch = Batch(self.bS)
+        self.tNew = None
+        self.operators = "+-*/%"
+        self.processArr = []
+        self.doneArr = []
+        self.timeT = 0
+        self.flag = False
+        self.batchCounter = 0
+        self.pauseCondition = False
+        self.auxProcess = Process()
+        self.processArr.append(self.auxProcess)
         
-        if(auxProcess.operation == "/"):
-            auxProcess.result = round(auxProcess.x / auxProcess.y,2)
-            auxProcess.fullOpe = str(auxProcess.x) + auxProcess.operation + str(auxProcess.y)
+        self.operate() #start program
 
-        elif(auxProcess.operation == "%"):
-            auxProcess.result = round(auxProcess.x % auxProcess.y,2)
-            auxProcess.fullOpe = str(auxProcess.x) + auxProcess.operation + str(auxProcess.y)
+    def operate(self):
+        self.mainWindow()
+        self.loadingWindowM()
+        self.processingWindowM()
 
-        elif(auxProcess.operation == "+"):
-            auxProcess.result = round(auxProcess.x + auxProcess.y,2)
-            auxProcess.fullOpe = str(auxProcess.x) + auxProcess.operation + str(auxProcess.y)
+    def windowFormat(self):
+        window = tk.Tk()
+        window.title("Operative System")
+        window.configure(background="#000000")
+        window.geometry("1080x720")
+        return window
 
-        elif(auxProcess.operation == "-"):
-            auxProcess.result = round(auxProcess.x - auxProcess.y,2)
-            auxProcess.fullOpe = str(auxProcess.x) + auxProcess.operation + str(auxProcess.y)
+    def labelFormat(self, master, text):
+        lbl = tk.Label(master, text=text, foreground='#d7c7ff', bg="#000000", justify=tk.CENTER, font=('Century Gothic', 12))
+        return lbl
 
-        elif(auxProcess.operation == "*"):
-            auxProcess.result = round(auxProcess.x * auxProcess.y,2)
-            auxProcess.fullOpe = str(auxProcess.x) + auxProcess.operation + str(auxProcess.y)
+    def entryFormat(self, master, textVariable):
+        entry = tk.Entry(master, textvariable=textVariable, bg="#e1d7fa", font=('Century Gothic', 11, 'bold'), justify=tk.CENTER)
+        return entry
 
-        #Process enqueue
+    def submitC(self):
+        self.entVar = int(self.txtVar.get())
+        self.window.destroy()
+        self.tNew = self.entVar
 
-        if(auxBatch.processQueue.full()):     #When reaching batch size, enqueue batch
-            batchQueue.put(auxBatch)
-            auxBatch = Batch(bS)
+    def processCapture(self):
+        i = 0
+        
+        while (self.tNew != 0):
+            self.auxProcess = Process()
+            name = "Process" + str(i+1)
+            meOma0 = int(random.randrange(1,2))
+            self.auxProcess.name = name
+            self.auxProcess.pid = i+1
+            self.auxProcess.x = int(random.randrange(-99,99))
+            self.auxProcess.operation = random.choice(self.operators)
+            
+            if(self.auxProcess.operation == "/" or self.auxProcess.operation == "%"):
+                if(meOma0 == 1):
+                    self.auxProcess.y = int(random.randrange(1,99))
+                else:
+                    self.auxProcess.y = int(random.randrange(-99,-1))
+            else:
+                self.auxProcess.y = int(random.randrange(-99,99))
+            self.auxProcess.met = int(random.randrange(5,25))
+            
+            if(self.auxProcess.operation == "/"):
+                self.auxProcess.result = round(self.auxProcess.x / self.auxProcess.y,2)
+                self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
 
-        auxBatch.processQueue.put(auxProcess)
+            elif(self.auxProcess.operation == "%"):
+                self.auxProcess.result = round(self.auxProcess.x % self.auxProcess.y,2)
+                self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
 
-        i += 1
-        tNew -= 1 #Decrement remaining processes
+            elif(self.auxProcess.operation == "+"):
+                self.auxProcess.result = round(self.auxProcess.x + self.auxProcess.y,2)
+                self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
 
-    if(not auxBatch.processQueue.empty()): #Case - Queuing an incomplete batch
-        batchQueue.put(auxBatch)
-    
-    return batchQueue
+            elif(self.auxProcess.operation == "-"):
+                self.auxProcess.result = round(self.auxProcess.x - self.auxProcess.y,2)
+                self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
 
-#for second program  
-def updateProgressbar():
-    step = progressVar.get()
-    step += 1
-    if (step > 100):
-        window.destroy()
-        return
-    progressVar.set(step)
-    progressBar["value"] = step
-    window.after(40, updateProgressbar)
-    
-    
-#for second program
-def keyHandler(key):
-    global auxProcess
-    global processArr
-    global pauseCondition
-    global timeT
+            elif(self.auxProcess.operation == "*"):
+                self.auxProcess.result = round(self.auxProcess.x * self.auxProcess.y,2)
+                self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
 
-    if(pauseCondition == False):
+            #Process enqueue
 
-        if(int(key.keycode) == 69): #ERROR - E
-            auxProcess.result = "ERROR"
-            auxProcess.tE = auxProcess.met #Asign time elapsed the same value as met to trigger new process asignment
+            if(self.auxBatch.processQueue.full()):     #When reaching batch size, enqueue batch
+                self.batchQueue.put(self.auxBatch)
+                self.auxBatch = Batch(self.bS)
 
-        elif(int(key.keycode) == 73): #INTERRUPTION - I
-            auxProcess.tE = auxProcess.tE - 1
-            processArr.append(auxProcess)
-            auxProcess = processArr[0] #assign process currently being processed
-            processArr.pop(0) #pop previous process from current batch process array
+            self.auxBatch.processQueue.put(self.auxProcess)
 
-        elif(int(key.keycode) == 80): #PAUSE - P
-            lf1.config(text="Paused")
-            pauseCondition = True
-            timeT = timeT - 1
-            auxProcess.tE = auxProcess.tE - 1
+            i += 1
+            self.tNew -= 1 #Decrement remaining processes
 
-    if(int(key.keycode) == 67): #CONTINUE - C
-        lf1.config(text="Processing")
-        pauseCondition = False
-        timeT = timeT + 1
-        auxProcess.tE = auxProcess.tE + 1
+        if(not self.auxBatch.processQueue.empty()): #Case - Queuing an incomplete batch
+            self.batchQueue.put(self.auxBatch)
 
-    return
+    def mainWindow(self):
+        self.window = self.windowFormat()
+        lbl = self.labelFormat(self.window, "\n\n\n\nHow many operations do you want to process?\n")
+        lbl.pack()
+        
+        self.txtVar = tk.StringVar()
 
-def updateProcessing():
-    global batchQueue
-    global doneArr
-    global processArr
-    global auxProcess
-    global batchCounter
-    global timeT
-    global pauseCondition
-    global flag
+        processEnt = self.entryFormat(self.window, self.txtVar)
+        processEnt.pack()
 
-    if(not timeT == 0):
+        lbl = self.labelFormat(self.window, "")
+        lbl.pack()
 
-        if(auxProcess.tE == auxProcess.met):
-            if(not auxProcess.pid == None):
-                doneArr.append(auxProcess)
+        sub = tk.Button(self.window, text='Submit', font=('Century Gothic', 11), relief="flat", background='#e1d7fa', command=self.submitC)
+        sub.pack()
+        self.window.mainloop()
+        
+    def loadingWindowM(self):
 
-            if(len(processArr) > 0):
-                auxProcess = processArr[0] #assign process currently being processed
-                processArr.pop(0) #pop it from current batch processes array
+        self.processCapture()
+        
+        self.loadingWindow = self.windowFormat() #generating processes window
+
+        self.lbl = self.labelFormat(self.loadingWindow,"\n\n\n\n\nGenerating operations...\n")
+        self.lbl.pack()
+
+        self.progressBarSyle = ttk.Style() #progressbar style
+        self.progressBarSyle.theme_use('clam')
+
+        self.progressBarSyle.configure("violet.Horizontal.TProgressbar",troughcolor='#000000',background='#d7c7ff',darkcolor="#e1d7fa",lightcolor="#ffffff",bordercolor="#e1d7fa",)
+
+        self.progressVar = tk.DoubleVar()
+        
+        self.progressBar = ttk.Progressbar(variable=self.progressVar,length=250,maximum=100, style="violet.Horizontal.TProgressbar")
+        self.progressBar.pack()
+
+        self.updateProgressbar()
+
+        self.loadingWindow.mainloop()
+
+    def updateProgressbar(self):
+        step = self.progressVar.get()
+        step += 1
+        if step > 100:
+            self.loadingWindow.destroy()
+            return
+        self.progressVar.set(step)
+        self.progressBar["value"] = step
+        self.loadingWindow.after(40, self.updateProgressbar)
+        
+    def processingWindowM(self):
+        self.processingWindow = self.windowFormat()
+        self.processArr = []
+        self.doneArr = [] #array to store finished processes (it is initialized here because they are permanent)
+
+        self.processingWindow.columnconfigure(0, weight=1)
+        self.processingWindow.columnconfigure(1, weight=1)
+        self.processingWindow.columnconfigure(2, weight=1)
+
+        self.timeT = 0
+        self.flag = False
+        self.batchCounter = 0
+        self.pauseCondition = False
+
+
+        #left panel
+
+
+        self.lbl01 = self.labelFormat(self.processingWindow,"\nNumber of Batches remaining: " + str(self.batchQueue.qsize()))
+        self.lbl01.grid(row=0, column=2)
+
+        self.lf0 = tk.LabelFrame(self.processingWindow, text="Curret Batch", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
+        self.lf0.grid(row=1, column=0, padx=20, sticky=tk.NSEW)
+
+        self.lbl02 = self.labelFormat(self.lf0, "Name   MET    TE")
+        self.lbl02.pack()
+
+        self.lbl00 = tk.Label(self.lf0, text="",bg="#000000",justify=tk.CENTER, font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl00.pack() #pending processes
+
+
+        #middle panel
+
+
+        self.lf1 = tk.LabelFrame(self.processingWindow, text="Processing", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
+        self.lf1.grid(row=1, column=1, padx=20, sticky=tk.NSEW)
+
+        self.lbl1 = tk.Label(self.lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl1.pack(anchor="w")
+        self.lbl2 = tk.Label(self.lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl2.pack(anchor="w")
+        self.lbl3 = tk.Label(self.lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl3.pack(anchor="w")
+        self.lbl4 = tk.Label(self.lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl4.pack(anchor="w")
+        self.lbl5 = tk.Label(self.lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl5.pack(anchor="w")
+        self.lbl6 = tk.Label(self.lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl6.pack(anchor="w")
+
+
+        #right panel
+
+
+        self.lf2 = tk.LabelFrame(self.processingWindow, text="Done", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
+        self.lf2.grid(row=1, column=2, padx=20, sticky=tk.NSEW)
+
+        self.lbl7 = self.labelFormat(self.lf2,"ID      OP    ANS")
+        self.lbl7.pack()
+
+        self.lbl9 = tk.Label(self.lf2, text="",bg="#000000",justify=tk.CENTER, font=('Century Gothic',12), foreground='#d7c7ff')
+        self.lbl9.pack() #done
+
+        self.lbl10 = tk.Label(self.processingWindow, text="Total time elapsed: 0",bg="#000000",justify=tk.CENTER, font=('Century Gothic',12), foreground='#d7c7ff')#done
+        self.lbl10.grid(row=2, column=2, padx=20)
+
+        self.updateProcessing()
+
+        self.processingWindow.mainloop()
+
+    def keyHandler(self, key):
+        if self.pauseCondition == False:
+            if int(key.keycode) == 69:  # ERROR - E
+                self.auxProcess.result = "ERROR"
+                self.auxProcess.tE = self.auxProcess.met  # Trigger new process assignment
+                
+            elif int(key.keycode) == 73:  # INTERRUPTION - I
+                self.auxProcess.tE -= 1
+                self.processArr.append(self.auxProcess) 
+                self.auxProcess = self.processArr.pop(0) #assign process currently being processed and pop previous process from current batch process array
+                
+            elif int(key.keycode) == 80:  # PAUSE - P
+                self.lf1.config(text="Paused")
+                self.pauseCondition = True
+                self.timeT -= 1
+                self.auxProcess.tE -= 1
+                
+        if int(key.keycode) == 67:  # CONTINUE - C
+            self.lf1.config(text="Processing")
+            self.pauseCondition = False
+            self.timeT += 1
+            self.auxProcess.tE += 1
+
+    def updateProcessing(self):
+
+        if(self.auxProcess.tE == self.auxProcess.met):
+            if(not self.auxProcess.pid == None):
+                self.doneArr.append(self.auxProcess)
+
+            if(len(self.processArr) > 0):
+                self.auxProcess = self.processArr[0] #assign process currently being processed
+                self.processArr.pop(0) #pop it from current batch processes array
 
             else:
-                flag = False
+                self.flag = False
 
-        if(len(processArr) == 0 and flag == False): #get new batch and fill processArr with current batch processes
-            if (not batchQueue.empty()):
-                currentBatch = batchQueue.get()
+        if(len(self.processArr) == 0 and self.flag == False): #get new batch and fill processArr with current batch processes
+            if (not self.batchQueue.empty()):
+                currentBatch = self.batchQueue.get()
 
-                batchCounter += 1
+                self.batchCounter += 1
                 batchNum = Process()
                 batchNum.pid = ""
-                batchNum.fullOpe = "- Batch number: " + str(batchCounter) +" -"
+                batchNum.fullOpe = "- Batch number: " + str(self.batchCounter) +" -"
                 batchNum.result = ""
 
-                doneArr.append(batchNum)
+                self.doneArr.append(batchNum)
 
                 for i in range(currentBatch.processQueue.qsize()):
-                    processArr.append(currentBatch.processQueue.get())
+                    self.processArr.append(currentBatch.processQueue.get())
 
-                auxProcess = processArr[0] #assign process currently being processed
-                processArr.pop(0) #pop it from current batch processes array
-                flag = True
+                self.auxProcess = self.processArr[0] #assign process currently being processed
+                self.processArr.pop(0) #pop it from current batch processes array
+                self.flag = True
 
-        lbl01.config(text="\nNumber of pending batches: " + str(batchQueue.qsize()))
+        self.lbl01.config(text="\nNumber of pending batches: " + str(self.batchQueue.qsize()))
 
-        processStr = ""
-        for i in processArr:
-            processStr = processStr + str(i.name)+ "    " +str(i.met) + "    " +str(i.tE) +"\n"
-        lbl00.config(text=processStr)
+        self.processStr = ""
+        for i in self.processArr:
+            self.processStr = self.processStr + str(i.name)+ "    " +str(i.met) + "    " +str(i.tE) +"\n"
+        self.lbl00.config(text=self.processStr)
 
-        lbl1.config(text="ID: " + str(auxProcess.pid))
-        lbl2.config(text="OP: " + str(auxProcess.fullOpe))
-        lbl3.config(text="MET: " + str(auxProcess.met))
-        lbl4.config(text="NAME: " + str(auxProcess.name))
-        lbl5.config(text="TE: " + str(auxProcess.tE))
-        lbl6.config(text="TR: " + str(auxProcess.met - auxProcess.tE))
+        self.lbl1.config(text="ID: " + str(self.auxProcess.pid))
+        self.lbl2.config(text="OP: " + str(self.auxProcess.fullOpe))
+        self.lbl3.config(text="MET: " + str(self.auxProcess.met))
+        self.lbl4.config(text="NAME: " + str(self.auxProcess.name))
+        self.lbl5.config(text="TE: " + str(self.auxProcess.tE))
+        self.lbl6.config(text="TR: " + str(self.auxProcess.met - self.auxProcess.tE))
 
         doneStr =""
-        for i in doneArr:
+        for i in self.doneArr:
           doneStr = doneStr + str(i.pid) + "    " + str(i.fullOpe) + "   " + str(i.result) + "\n"
-        lbl9.config(text=doneStr)
+        self.lbl9.config(text=doneStr)
 
-        lbl10.config(text="Total time elapsed: "+str(timeT))
+        self.lbl10.config(text="Total time elapsed: "+str(self.timeT))
 
-        if(pauseCondition == False):
-            auxProcess.tE = auxProcess.tE + 1
+        if(self.pauseCondition == False):
+            self.auxProcess.tE = self.auxProcess.tE + 1
 
-    else:
-        processArr.pop(0)
+        if(self.pauseCondition == False):
+            self.timeT = self.timeT + 1
+
+        if(self.auxProcess.tE == self.auxProcess.met + 1):
+            self.lbl1.config(text="ID: ")
+            self.lbl2.config(text="OP: ")
+            self.lbl3.config(text="MET: ")
+            self.lbl4.config(text="NAME: ")
+            self.lbl5.config(text="TE: ")
+            self.lbl6.config(text="TR: ")
+            return
+
+        self.processingWindow.bind("<Key>", self.keyHandler) #keypress detection
+
+        self.processingWindow.after(1000, self.updateProcessing)
+
+# Execute program
+if __name__ == "__main__":
     
-    if(pauseCondition == False):
-        timeT = timeT + 1
-
-    if(auxProcess.tE == auxProcess.met + 1):
-        lbl1.config(text="ID: ")
-        lbl2.config(text="OP: ")
-        lbl3.config(text="MET: ")
-        lbl4.config(text="NAME: ")
-        lbl5.config(text="TE: ")
-        lbl6.config(text="TR: ")
-        return
-
-    window.bind("<Key>", keyHandler) #keypress detection
-
-    window.after(1000, updateProcessing)
-
-
-#############################################Program start
-window = windowFormat()
-
-txtVar = tk.StringVar()
-entVar = None
-
-lbl = labelFormat(window,"\n\n\n\nHow many operations do you want to process?\n")
-lbl.pack()
-
-processEnt = entryFormat(window,txtVar)
-processEnt.pack()
-
-lbl = labelFormat(window,"")
-lbl.pack()
-
-sub = tk.Button(window,text='Submit', font=('Century Gothic',11), relief="flat", background='#e1d7fa', command=submitC)
-sub.pack()
-
-window.mainloop()
-
-
-#Process capture
-
-batchQueue = Queue()
-auxBatch = Batch(bS)
-tNew = entVar
-operators = "+-*/%"
-i = 0
-
-batchQueue = processCapture(batchQueue,auxBatch,tNew,operators)
-
-i = 0
-window = windowFormat() #generating processes window
-
-lbl = labelFormat(window,"\n\n\n\n\nGenerating operations...\n")
-lbl.pack()
-
-progressBarSyle = ttk.Style() #progressbar style
-progressBarSyle.theme_use('clam')
-
-progressBarSyle.configure("violet.Horizontal.TProgressbar",troughcolor='#000000',background='#d7c7ff',darkcolor="#e1d7fa",lightcolor="#ffffff",bordercolor="#e1d7fa",)
-
-progressVar = tk.DoubleVar()
-progressBar = ttk.Progressbar(variable=progressVar,length=250,maximum=100, style="violet.Horizontal.TProgressbar")
-progressBar.pack()
-
-updateProgressbar()
-
-window.mainloop()
-
-
-
-#End of first part
-
-
-
-window = windowFormat()
-displayProcess = Process()
-auxProcess = displayProcess
-processArr = []
-processArr.append(displayProcess)
-doneArr = [] #array to store finished processes (it is initialized here because they are permanent)
-
-window.columnconfigure(0, weight=1)
-window.columnconfigure(1, weight=1)
-window.columnconfigure(2, weight=1)
-
-timeT = 0
-flag = False
-batchCounter = 0
-pauseCondition = False
-
-
-#left panel
-
-
-lbl01 = labelFormat(window,"\nNumber of Batches remaining: " + str(batchQueue.qsize()))
-lbl01.grid(row=0, column=2)
-
-lf0 = tk.LabelFrame(window, text="Curret Batch", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
-lf0.grid(row=1, column=0, padx=20, sticky=tk.NSEW)
-
-lbl02 = labelFormat(lf0, "Name   MET    TE")
-lbl02.pack()
-
-lbl00 = tk.Label(lf0, text="",bg="#000000",justify=tk.CENTER, font=('Century Gothic',12), foreground='#d7c7ff')
-lbl00.pack() #pending processes
-
-
-#middle panel
-
-
-lf1 = tk.LabelFrame(window, text="Processing", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
-lf1.grid(row=1, column=1, padx=20, sticky=tk.NSEW)
-
-lbl1 = tk.Label(lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
-lbl1.pack(anchor="w")
-lbl2 = tk.Label(lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
-lbl2.pack(anchor="w")
-lbl3 = tk.Label(lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
-lbl3.pack(anchor="w")
-lbl4 = tk.Label(lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
-lbl4.pack(anchor="w")
-lbl5 = tk.Label(lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
-lbl5.pack(anchor="w")
-lbl6 = tk.Label(lf1, text="",bg="#000000", font=('Century Gothic',12), foreground='#d7c7ff')
-lbl6.pack(anchor="w")
-
-
-#right panel
-
-
-lf2 = tk.LabelFrame(window, text="Done", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
-lf2.grid(row=1, column=2, padx=20, sticky=tk.NSEW)
-
-lbl7 = labelFormat(lf2,"ID      OP    ANS")
-lbl7.pack()
-
-lbl9 = tk.Label(lf2, text="",bg="#000000",justify=tk.CENTER, font=('Century Gothic',12), foreground='#d7c7ff')
-lbl9.pack() #done
-
-lbl10 = tk.Label(window, text="Total time elapsed: 0",bg="#000000",justify=tk.CENTER, font=('Century Gothic',12), foreground='#d7c7ff')#done
-lbl10.grid(row=2, column=2, padx=20)
-
-updateProcessing()
-
-window.mainloop()
+    OperativeSystemApp()
