@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Aug 25 18:58:33 2024
-
-@author: USER
-"""
-
-import random
 import tkinter as tk
 from tkinter import ttk
 from process import Process
@@ -48,7 +40,7 @@ class OperativeSystemApp:
         window.configure(background="#000000")
         window.geometry("1080x720")
         return window
-   
+
     def errorFormat(self):
         windows = tk.Tk()
         windows.title("Operative system")
@@ -80,17 +72,17 @@ class OperativeSystemApp:
             self.auxProcess.y = int(self.txtY.get())
             self.auxProcess.fullOpe = self.txtFullOp.get()
             self.auxProcess.met = int(self.txtMet.get())
-            
+
             if (self.auxProcess.pid in self.validId):
                 self.error = self.errorFormat()
                 lbl = self.labelFormat(self.error, "This ID already exists")
                 lbl.pack()
-            
+
             elif (self.auxProcess.met < 1):
                 self.error = self.errorFormat()
                 lbl = self.labelFormat(self.error, "Invalid MET")
                 lbl.pack()
-                
+
             else:
                 if(self.auxProcess.operation == "/"):
                     if(self.auxProcess.y == 0):
@@ -102,7 +94,7 @@ class OperativeSystemApp:
                         self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
                         self.validId.append(self.auxProcess.pid)
                         self.window.destroy()
-    
+
                 elif(self.auxProcess.operation == "%"):
                     if(self.auxProcess.y == 0):
                         self.error = self.errorFormat()
@@ -113,33 +105,33 @@ class OperativeSystemApp:
                         self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
                         self.validId.append(self.auxProcess.pid)
                         self.window.destroy()
-        
+
                 elif(self.auxProcess.operation == "+"):
                     self.auxProcess.result = round(self.auxProcess.x + self.auxProcess.y,2)
                     self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
                     self.validId.append(self.auxProcess.pid)
                     self.window.destroy()
-    
+
                 elif(self.auxProcess.operation == "-"):
                     self.auxProcess.result = round(self.auxProcess.x - self.auxProcess.y,2)
                     self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
                     self.validId.append(self.auxProcess.pid)
                     self.window.destroy()
-    
+
                 elif(self.auxProcess.operation == "*"):
                     self.auxProcess.result = round(self.auxProcess.x * self.auxProcess.y,2)
                     self.auxProcess.fullOpe = str(self.auxProcess.x) + self.auxProcess.operation + str(self.auxProcess.y)
                     self.validId.append(self.auxProcess.pid)
                     self.window.destroy()
-        
-            
+
+
     def processWindow(self):
         i = 0
         while (self.tNew != 0):
-            
+
             self.window = self.windowFormat()
             self.auxProcess = Process()
-            
+
             self.txtName = tk.StringVar()
             self.txtId = tk.StringVar()
             self.txtX = tk.StringVar()
@@ -147,14 +139,14 @@ class OperativeSystemApp:
             self.txtY = tk.StringVar()
             self.txtMet = tk.StringVar()
             self.txtFullOp = tk.StringVar()
-            
+
             self.window.columnconfigure(0, weight=1)
             self.window.columnconfigure(1, weight=1)
             self.window.columnconfigure(2, weight=1)
-            
-            self.lf = tk.LabelFrame(self.window, text = "Process number: " +  str(i + 1), padx= 20, pady = 20, font=('Century Gothic', 12), relief="flat", bg="#000000", foreground='#d7c7ff')
+
+            self.lf = tk.LabelFrame(self.window, text = "Process number: " +  str(i + 1), padx= 20, pady = 20, font=('Century Gothic', 12), bg="#000000", foreground='#d7c7ff')
             self.lf.grid(row = 0, column = 1, padx = 20, pady = 20)
-            
+
             lbl = self.labelFormat(self.lf,"Process name: ")
             lbl.pack()
             ent1 = self.entryFormat(self.lf,self.txtName)
@@ -179,20 +171,19 @@ class OperativeSystemApp:
             lbl.pack()
             ent6 = self.entryFormat(self.lf,self.txtMet)
             ent6.pack()
-        
+
             lbl = self.labelFormat(self.lf,"")
             lbl.pack()
-        
+
             sub = tk.Button(self.lf,text='Submit', font=('Century Gothic',11), relief="flat", background='#e1d7fa', command=self.processCapture)
             sub.pack()
-        
+
             self.window.mainloop()
-            
+
             #Process enqueue
 
             if(self.auxBatch.processQueue.full()):     #When reaching batch size, enqueue batch
                 self.batchQueue.put(self.auxBatch)
-                print(str(self.batchQueue.qsize()))
                 self.auxBatch = Batch(self.bS)
 
             self.auxBatch.processQueue.put(self.auxProcess)
@@ -202,8 +193,7 @@ class OperativeSystemApp:
 
         if(not self.auxBatch.processQueue.empty()): #Case - Queuing an incomplete batch
             self.batchQueue.put(self.auxBatch)
-            print(".."+str(self.batchQueue.qsize()))
-        
+
     def mainWindow(self):
         self.window = self.windowFormat()
         lbl = self.labelFormat(self.window, "\n\n\n\nHow many operations do you want to process?\n")
@@ -256,11 +246,7 @@ class OperativeSystemApp:
 
     def processingWindowM(self):
         self.processingWindow = self.windowFormat()
-
-        self.displayProcess = Process()
-        self.auxProcess = self.displayProcess
         self.processArr = []
-        self.processArr.append(self.displayProcess)
         self.doneArr = [] #array to store finished processes (it is initialized here because they are permanent)
 
         self.processingWindow.columnconfigure(0, weight=1)
@@ -329,64 +315,60 @@ class OperativeSystemApp:
         self.processingWindow.mainloop()
 
     def updateProcessing(self):
-        if(not self.timeT == 0):
+        if(self.auxProcess.tE == self.auxProcess.met):
+            if(not self.auxProcess.pid == None):
+                self.doneArr.append(self.auxProcess)
 
-            if(self.auxProcess.tE == self.auxProcess.met):
-                if(not self.auxProcess.pid == None):
-                    self.doneArr.append(self.auxProcess)
+            if(len(self.processArr) > 0):
+                self.auxProcess = self.processArr[0] #assign process currently being processed
+                self.processArr.pop(0) #pop it from current batch processes array
 
-                if(len(self.processArr) > 0):
-                    self.auxProcess = self.processArr[0] #assign process currently being processed
-                    self.processArr.pop(0) #pop it from current batch processes array
+            else:
+                self.flag = False
 
-                else:
-                    self.flag = False
+        if(len(self.processArr) == 0 and self.flag == False): #get new batch and fill processArr with current batch processes
+            if (not self.batchQueue.empty()):
+                currentBatch = self.batchQueue.get()
 
-            if(len(self.processArr) == 0 and self.flag == False): #get new batch and fill processArr with current batch processes
-                if (not self.batchQueue.empty()):
-                    currentBatch = self.batchQueue.get()
+                self.batchCounter += 1
+                batchNum = Process()
+                batchNum.pid = ""
+                batchNum.fullOpe = "- Batch number: " + str(self.batchCounter) +" -"
+                batchNum.result = ""
 
-                    self.batchCounter += 1
-                    batchNum = Process()
-                    batchNum.pid = ""
-                    batchNum.fullOpe = "- Batch number: " + str(self.batchCounter) +" -"
-                    batchNum.result = ""
+                self.doneArr.append(batchNum)
 
-                    self.doneArr.append(batchNum)
+                for i in range(currentBatch.processQueue.qsize()):
+                    self.processArr.append(currentBatch.processQueue.get())
 
-                    for i in range(currentBatch.processQueue.qsize()):
-                        self.processArr.append(currentBatch.processQueue.get())
+                self.auxProcess = self.processArr[0] #assign process currently being processed
+                self.processArr.pop(0) #pop it from current batch processes array
+                self.flag = True
 
-                    self.auxProcess = self.processArr[0] #assign process currently being processed
-                    self.processArr.pop(0) #pop it from current batch processes array
-                    self.flag = True
+        self.lbl01.config(text="\nNumber of pending batches: " + str(self.batchQueue.qsize()))
 
-            self.lbl01.config(text="\nNumber of pending batches: " + str(self.batchQueue.qsize()))
+        self.processStr = ""
+        for i in self.processArr:
+            self.processStr = self.processStr + str(i.name)+ "    " +str(i.met) + "    " +str(i.tE) +"\n"
+        self.lbl00.config(text=self.processStr)
 
-            self.processStr = ""
-            for i in self.processArr:
-                self.processStr = self.processStr + str(i.name)+ "    " +str(i.met) + "    " +str(i.tE) +"\n"
-            self.lbl00.config(text=self.processStr)
+        self.lbl1.config(text="ID: " + str(self.auxProcess.pid))
+        self.lbl2.config(text="OP: " + str(self.auxProcess.fullOpe))
+        self.lbl3.config(text="MET: " + str(self.auxProcess.met))
+        self.lbl4.config(text="NAME: " + str(self.auxProcess.name))
+        self.lbl5.config(text="TE: " + str(self.auxProcess.tE))
+        self.lbl6.config(text="TR: " + str(self.auxProcess.met - self.auxProcess.tE))
 
-            self.lbl1.config(text="ID: " + str(self.auxProcess.pid))
-            self.lbl2.config(text="OP: " + str(self.auxProcess.fullOpe))
-            self.lbl3.config(text="MET: " + str(self.auxProcess.met))
-            self.lbl4.config(text="NAME: " + str(self.auxProcess.name))
-            self.lbl5.config(text="TE: " + str(self.auxProcess.tE))
-            self.lbl6.config(text="TR: " + str(self.auxProcess.met - self.auxProcess.tE))
+        doneStr =""
+        for i in self.doneArr:
+          doneStr = doneStr + str(i.pid) + "    " + str(i.fullOpe) + "   " + str(i.result) + "\n"
+        self.lbl9.config(text=doneStr)
 
-            doneStr =""
-            for i in self.doneArr:
-              doneStr = doneStr + str(i.pid) + "    " + str(i.fullOpe) + "   " + str(i.result) + "\n"
-            self.lbl9.config(text=doneStr)
+        self.lbl10.config(text="Total time elapsed: "+str(self.timeT))
 
-            self.lbl10.config(text="Total time elapsed: "+str(self.timeT))
+        if(self.pauseCondition == False):
+            self.auxProcess.tE = self.auxProcess.tE + 1
 
-            if(self.pauseCondition == False):
-                self.auxProcess.tE = self.auxProcess.tE + 1
-
-        else:
-            self.processArr.pop(0)
 
         if(self.pauseCondition == False):
             self.timeT = self.timeT + 1
@@ -401,9 +383,10 @@ class OperativeSystemApp:
             return
 
 
+
         self.processingWindow.after(1000, self.updateProcessing)
 
 # Execute program
 if __name__ == "__main__":
-
+    
     OperativeSystemApp()
