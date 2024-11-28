@@ -337,11 +337,12 @@ class OperativeSystemApp:
        
        
         for i in self.doneArr:
-            i.servT = i.te
-            i.retT = i.finT - i.arrT
-            i.waitT = i.retT - i.servT
-            self.pcbString2 = self.pcbString2 + str(i.pid).ljust(7) + str(i.met).ljust(7) + str (i.fullOpe).ljust(9) + str(i.result)+ "\n"
-            self.pcbString3 = self.pcbString3  + str(i.arrT).ljust(15) + str(i.finT).ljust(15) + str(i.servT).ljust(15) + str(i.waitT).ljust(15) + str(i.retT).ljust(16) + str(i.resT).ljust(18) + str("N/A") + "\n"
+            if(i.pid != None):
+                i.servT = i.te
+                i.retT = i.finT - i.arrT
+                i.waitT = i.retT - i.servT
+                self.pcbString2 = self.pcbString2 + str(i.pid).ljust(7) + str(i.met).ljust(7) + str (i.fullOpe).ljust(9) + str(i.result)+ "\n"
+                self.pcbString3 = self.pcbString3  + str(i.arrT).ljust(15) + str(i.finT).ljust(15) + str(i.servT).ljust(15) + str(i.waitT).ljust(15) + str(i.retT).ljust(16) + str(i.resT).ljust(18) + str("N/A") + "\n"
         
         self.lf6 = tk.LabelFrame(self.framePCB, text = 'Terminated', padx=10, pady=10, font=('Century Gothic',12),bg="#000000", foreground='#d7c7ff')
         self.lf6.grid(row=6, column=1, padx=20, pady=20, sticky=tk.NSEW)
@@ -405,7 +406,8 @@ class OperativeSystemApp:
 
         doneStr =""
         for i in self.doneArr:
-            doneStr = doneStr + str(i.pid) + "    " + str(i.fullOpe) + "   " + str(i.result) + "\n"
+            if(i.pid != None):
+                doneStr = doneStr + str(i.pid) + "    " + str(i.fullOpe) + "   " + str(i.result) + "\n"
         self.lbl9.config(text=doneStr)
 
         self.lbl10.config(text="Total time elapsed: "+str(self.timeT))
