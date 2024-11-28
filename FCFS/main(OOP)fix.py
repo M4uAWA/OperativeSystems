@@ -116,8 +116,6 @@ class OperativeSystemApp:
             i += 1
             self.tNew -= 1 #Decrement remaining processes
         
-
-
     def mainWindow(self):
         self.window = self.windowFormat()
         lbl = self.labelFormat(self.window, "\n\n\n\nHow many operations do you want to process?\n")
@@ -170,11 +168,7 @@ class OperativeSystemApp:
 
     def processingWindowM(self):
         self.processingWindow = self.windowFormat()
-
-        self.displayProcess = Process()
-        self.auxProcess = self.displayProcess
         self.readyArr = []
-        self.readyArr.append(self.displayProcess)
         self.doneArr = [] #array to store finished processes (it is initialized here because they are permanent)
         
         i = 0
@@ -184,9 +178,11 @@ class OperativeSystemApp:
             self.maxBlocked = len(self.newArr)
 
         for i in range(len(self.newArr)): #set the amount of processes that can be in the system at once
-            if(i == 4):
+            if(i == 5):
                 break
             self.readyArr.append(self.newArr.pop(0))
+            
+        self.auxProcess = self.readyArr.pop(0)
 
         self.processingWindow.columnconfigure(0, weight=1)
         self.processingWindow.columnconfigure(1, weight=1)
@@ -195,10 +191,7 @@ class OperativeSystemApp:
         self.timeT = 0
         self.flag = False
         self.pauseCondition = False
-
-
         #left panel
-
 
         self.lbl01 = self.labelFormat(self.processingWindow,"\nNumber of pending New: " + str(len(self.newArr)))
         self.lbl01.grid(row=0, column=2)
@@ -324,114 +317,108 @@ class OperativeSystemApp:
         self.timeChange = self.timeT #sets the time at which the interruption was made
 
     def showPCB(self, doneArr):
-       self.framePCB = self.windowFormat()
-       self.framePCB.geometry("1908x720")
-       self.framePCB.resizable(width=False, height=False)
-       self.pcbString = "ID     MET    OPE      ANS";
-       self.pcbString1 = " ArrivalTime     FinalTime     ServiceTime     WaitingTime     ReturnTime     ResponseTime     BlockedTime"
-       self.pcbString2, self.pcbString3 = [""] * 2
-       
-       self.lf4 = tk.LabelFrame(self.framePCB, text="P C B", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
-       self.lf4.grid(row=1, column=1, padx=20,pady=10, sticky=tk.NSEW)
-    
-       self.lf5 = tk.LabelFrame(self.framePCB, text="T I M E S", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
-       self.lf5.grid(row=1, column=2, padx=20,pady=10, sticky=tk.NSEW)
-    
-       self.lblpcb = self.dataFormat(self.lf4, text=self.pcbString)
-       self.lblpcb.pack() 
-       self.lblpcb1 = self.dataFormat(self.lf5, text=self.pcbString1)
-       self.lblpcb1.pack()
-       
-       
-       for i in self.doneArr:
-           
-           if(i.pid != None):
-               i.servT = i.te
-               i.retT = i.finT - i.arrT
-               i.waitT = i.retT - i.servT
-               self.pcbString2 = self.pcbString2 + str(i.pid).ljust(7) + str(i.met).ljust(7) + str (i.fullOpe).ljust(9) + str(i.result)+ "\n"
-               self.pcbString3 = self.pcbString3  + str(i.arrT).ljust(15) + str(i.finT).ljust(15) + str(i.servT).ljust(15) + str(i.waitT).ljust(15) + str(i.retT).ljust(16) + str(i.resT).ljust(18) + str("N/A") + "\n"
+        self.framePCB = self.windowFormat()
+        self.framePCB.geometry("1908x720")
+        self.framePCB.resizable(width=False, height=False)
+        self.pcbString = "ID     MET    OPE      ANS";
+        self.pcbString1 = " ArrivalTime     FinalTime     ServiceTime     WaitingTime     ReturnTime     ResponseTime     BlockedTime"
+        self.pcbString2, self.pcbString3 = [""] * 2
         
-       self.lf6 = tk.LabelFrame(self.framePCB, text = 'Terminated', padx=10, pady=10, font=('Century Gothic',12),bg="#000000", foreground='#d7c7ff')
-       self.lf6.grid(row=6, column=1, padx=20, pady=20, sticky=tk.NSEW)
-
-       self.lf7 = tk.LabelFrame(self.framePCB, text="-", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
-       self.lf7.grid(row=6, column=2, padx=20, pady=20, sticky=tk.NSEW)
- 
-       self.lblpcb1 = self.dataFormat(self.lf6, text=self.pcbString2)
-       self.lblpcb1.pack()
+        self.lf4 = tk.LabelFrame(self.framePCB, text="P C B", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
+        self.lf4.grid(row=1, column=1, padx=20,pady=10, sticky=tk.NSEW)
+        
+        self.lf5 = tk.LabelFrame(self.framePCB, text="T I M E S", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
+        self.lf5.grid(row=1, column=2, padx=20,pady=10, sticky=tk.NSEW)
+        
+        self.lblpcb = self.dataFormat(self.lf4, text=self.pcbString)
+        self.lblpcb.pack() 
+        self.lblpcb1 = self.dataFormat(self.lf5, text=self.pcbString1)
+        self.lblpcb1.pack()
+       
+       
+        for i in self.doneArr:
+            i.servT = i.te
+            i.retT = i.finT - i.arrT
+            i.waitT = i.retT - i.servT
+            self.pcbString2 = self.pcbString2 + str(i.pid).ljust(7) + str(i.met).ljust(7) + str (i.fullOpe).ljust(9) + str(i.result)+ "\n"
+            self.pcbString3 = self.pcbString3  + str(i.arrT).ljust(15) + str(i.finT).ljust(15) + str(i.servT).ljust(15) + str(i.waitT).ljust(15) + str(i.retT).ljust(16) + str(i.resT).ljust(18) + str("N/A") + "\n"
+        
+        self.lf6 = tk.LabelFrame(self.framePCB, text = 'Terminated', padx=10, pady=10, font=('Century Gothic',12),bg="#000000", foreground='#d7c7ff')
+        self.lf6.grid(row=6, column=1, padx=20, pady=20, sticky=tk.NSEW)
     
-       self.lblpcb2 = self.dataFormat(self.lf7, text=self.pcbString3)
-       self.lblpcb2.pack()
+        self.lf7 = tk.LabelFrame(self.framePCB, text="-", padx=10, pady=10, font=('Century Gothic',12), bg="#000000", foreground='#d7c7ff')
+        self.lf7.grid(row=6, column=2, padx=20, pady=20, sticky=tk.NSEW)
+     
+        self.lblpcb1 = self.dataFormat(self.lf6, text=self.pcbString2)
+        self.lblpcb1.pack()
+        
+        self.lblpcb2 = self.dataFormat(self.lf7, text=self.pcbString3)
+        self.lblpcb2.pack()
     
     def updateProcessing(self):
-        if(not self.timeT == 0):
-            
-            for i in self.blockedArr:
-                if(i.ttb == 7):
-                    self.blockedLblArr.pop(0).destroy()
-                    
-            for i in range(len(self.blockedArr) - len(self.blockedLblArr)): #Get the diference in lenght between blocked labels and blocked processes, and iterate that many times
-                    self.readyArr.append(self.blockedArr.pop(0)) #append list of ready with the processes that have reached their time limit (the oldest ones)
-
-                    if(self.auxProcess.pid == "NULL"): #If there are no processes in ready, automatically set current process (if NULL process was running)
-                        self.auxProcess = self.readyArr.pop(0)
-            
-            if(self.auxProcess.te == self.auxProcess.met):
+        
+        for i in self.blockedArr:
+            if(i.ttb == 7):
+                self.blockedLblArr.pop(0).destroy()
                 
-                self.auxProcess.finT = self.timeT
-                    
-                if(len(self.newArr) > 0):
-                    self.doneArr.append(self.auxProcess)
-                    self.tAuxProcess = self.newArr.pop(0)
-                    self.tAuxProcess.arrT = self.timeT
-                    self.readyArr.append(self.tAuxProcess)
-                    self.auxProcess = self.readyArr.pop(0)#assign process currently being processed
+        for i in range(len(self.blockedArr) - len(self.blockedLblArr)): #Get the diference in lenght between blocked labels and blocked processes, and iterate that many times
+                self.readyArr.append(self.blockedArr.pop(0)) #append list of ready with the processes that have reached their time limit (the oldest ones)
 
-                    
-                elif(len(self.readyArr) > 0):
-                    self.maxBlocked -= 1
-                    self.doneArr.append(self.auxProcess)
-                    self.auxProcess = self.readyArr[0] #assign process currently being processed
-                    self.readyArr.pop(0) #pop it from current batch processes array
-
-                else:
-                    self.flag = False
-                    self.doneArr.append(self.auxProcess)
-
-
-            self.lbl01.config(text="\nNumber of pending New: " + str(len(self.newArr)))
-
-            self.processStr = ""
-            for i in self.readyArr:
-                self.processStr = self.processStr + str(i.pid)+ "    " +str(i.met) + "    " +str(i.te) +"\n"
-            self.lbl00.config(text=self.processStr)
-
-            self.lbl1.config(text="ID: " + str(self.auxProcess.pid))
-            self.lbl2.config(text="OP: " + str(self.auxProcess.fullOpe))
-            self.lbl3.config(text="MET: " + str(self.auxProcess.met))
-            self.lbl4.config(text="TE: " + str(self.auxProcess.te))
-            self.lbl5.config(text="TR: " + str(self.auxProcess.met - self.auxProcess.te))
-
-            doneStr =""
-            for i in self.doneArr:
-                if( i.pid != None):
-                    doneStr = doneStr + str(i.pid) + "    " + str(i.fullOpe) + "   " + str(i.result) + "\n"
-            self.lbl9.config(text=doneStr)
-
-            self.lbl10.config(text="Total time elapsed: "+str(self.timeT))
-
-            if(self.pauseCondition == False):
-                self.auxProcess.te = self.auxProcess.te + 1
+                if(self.auxProcess.pid == "NULL"): #If there are no processes in ready, automatically set current process (if NULL process was running)
+                    self.auxProcess = self.readyArr.pop(0)
+        
+        if(self.auxProcess.te == self.auxProcess.met):
             
-            count = 0
-            for i in self.blockedArr: #iterate in blocked list
-                self.blockedLblArr[count].config(text="ID: " + str(i.pid) +"\n" + "TTB: " + str(i.ttb)) #Update values
-                self.blockedLblArr[count].grid(row=0,column=count, padx=15, pady=15) #pack them (show them in the GUI)
-                count += 1
+            self.auxProcess.finT = self.timeT
+                
+            if(len(self.newArr) > 0):
+                self.doneArr.append(self.auxProcess)
+                self.tAuxProcess = self.newArr.pop(0)
+                self.tAuxProcess.arrT = self.timeT
+                self.readyArr.append(self.tAuxProcess)
+                self.auxProcess = self.readyArr.pop(0)#assign process currently being processed
 
-        else:
-            self.readyArr.pop(0)
+                
+            elif(len(self.readyArr) > 0):
+                self.maxBlocked -= 1
+                self.doneArr.append(self.auxProcess)
+                self.auxProcess = self.readyArr[0] #assign process currently being processed
+                self.readyArr.pop(0) #pop it from current batch processes array
+
+            else:
+                self.flag = False
+                self.doneArr.append(self.auxProcess)
+
+
+        self.lbl01.config(text="\nNumber of pending New: " + str(len(self.newArr)))
+
+        self.processStr = ""
+        for i in self.readyArr:
+            self.processStr = self.processStr + str(i.pid)+ "    " +str(i.met) + "    " +str(i.te) +"\n"
+        self.lbl00.config(text=self.processStr)
+
+        self.lbl1.config(text="ID: " + str(self.auxProcess.pid))
+        self.lbl2.config(text="OP: " + str(self.auxProcess.fullOpe))
+        self.lbl3.config(text="MET: " + str(self.auxProcess.met))
+        self.lbl4.config(text="TE: " + str(self.auxProcess.te))
+        self.lbl5.config(text="TR: " + str(self.auxProcess.met - self.auxProcess.te))
+
+        doneStr =""
+        for i in self.doneArr:
+            doneStr = doneStr + str(i.pid) + "    " + str(i.fullOpe) + "   " + str(i.result) + "\n"
+        self.lbl9.config(text=doneStr)
+
+        self.lbl10.config(text="Total time elapsed: "+str(self.timeT))
+
+        if(self.pauseCondition == False):
+            self.auxProcess.te = self.auxProcess.te + 1
+        
+        count = 0
+        for i in self.blockedArr: #iterate in blocked list
+            self.blockedLblArr[count].config(text="ID: " + str(i.pid) +"\n" + "TTB: " + str(i.ttb)) #Update values
+            self.blockedLblArr[count].grid(row=0,column=count, padx=15, pady=15) #pack them (show them in the GUI)
+            count += 1
+
 
         if(self.pauseCondition == False):
             self.timeT = self.timeT + 1
