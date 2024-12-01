@@ -62,7 +62,7 @@ def processCapture(newArr,tProcesses,operators,idCount):
         name = "Process" + str(idCount+1)
         meOma0 = int(random.randrange(1,2))
         auxProcess.name = name
-        auxProcess.pid = idCount
+        auxProcess.pid = idCount+1
         auxProcess.x = int(random.randrange(-99,99))
         auxProcess.operation = random.choice(operators)
         auxProcess.size = int(random.randrange(6,26))
@@ -671,6 +671,7 @@ def clearPages():
     for i in memArray:
         if(i["processId"] == auxProcess.pid):
             i['status'] = -1
+            i["processId"] = "--"
 
 def setReadyPages():
     global auxProcess
@@ -744,7 +745,7 @@ for i in range(memorySize): #initialize all frames
 
 #SO memory space
 for i in range(memorySize - 4,memorySize):
-    memArray[i]['processId'] = -2
+    memArray[i]['processId'] = "OS"
     memArray[i]['status'] = -2
     memArray[i]['used'] = frameSize
 
