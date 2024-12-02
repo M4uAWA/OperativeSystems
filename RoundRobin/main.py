@@ -260,6 +260,10 @@ class OperativeSystemApp:
         self.processingWindow.mainloop()
 
     def keyHandler(self, key):
+        
+        if self.pcbCondition:
+            return
+        
         if self.pauseCondition == False:
             if int(key.keycode) == 69:  # ERROR - E
                 if(not (self.auxProcess.pid == "NULL")): #if it's null process, don't do ERROR procedure
@@ -328,12 +332,13 @@ class OperativeSystemApp:
                 self.lf1.config(text="Paused")
                 self.pauseCondition = True
                 
-                self.timeT -= 1
-                self.auxProcess.te -= 1
-                self.auxProcess.quantum = self.auxProcess.quantum - 1
-                
-                for i in self.blockedArr:
-                    i.ttb = i.ttb - 1
+                if(self.timeChange != self.timeT):
+                    self.timeT -= 1
+                    self.auxProcess.te -= 1
+                    self.auxProcess.quantum = self.auxProcess.quantum - 1
+                    
+                    for i in self.blockedArr:
+                        i.ttb = i.ttb - 1
                 
                 if(int(key.keycode) == 84):
                    self.pcbCondition= True
@@ -342,10 +347,11 @@ class OperativeSystemApp:
         if int(key.keycode) == 67:  # CONTINUE - C
             if(self.pauseCondition == True): #don't alter if there were no pauses
                 self.lf1.config(text="Running")
-                self.timeT = self.timeT + 1
-                self.auxProcess.te = self.auxProcess.te + 1
-                for i in self.blockedArr:
-                    i.ttb = i.ttb + 1
+                if(self.timeChange != self.timeT):
+                    self.timeT = self.timeT + 1
+                    self.auxProcess.te = self.auxProcess.te + 1
+                    for i in self.blockedArr:
+                        i.ttb = i.ttb + 1
                 self.pauseCondition = False
         
         self.timeChange = self.timeT #sets the time at which the interruption was made
