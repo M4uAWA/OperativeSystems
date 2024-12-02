@@ -300,18 +300,21 @@ class OperativeSystemApp:
             elif int(key.keycode) == 80:  # PAUSE - P
                 self.lf1.config(text="Paused")
                 self.pauseCondition = True
-                self.timeT -= 1
-                self.auxProcess.te -= 1
-                for i in self.blockedArr:
-                    i.ttb = i.ttb - 1
+                
+                if(self.timeChange != self.timeT):
+                    self.timeT -= 1
+                    self.auxProcess.te -= 1
+                    for i in self.blockedArr:
+                        i.ttb = i.ttb - 1
 
         if int(key.keycode) == 67:  # CONTINUE - C
             if(self.pauseCondition == True): #don't alter if there were no pauses
                 self.lf1.config(text="Running")
-                self.timeT = self.timeT + 1
-                self.auxProcess.te = self.auxProcess.te + 1
-                for i in self.blockedArr:
-                    i.ttb = i.ttb + 1
+                if(self.timeChange != self.timeT):
+                    self.timeT = self.timeT + 1
+                    self.auxProcess.te = self.auxProcess.te + 1
+                    for i in self.blockedArr:
+                        i.ttb = i.ttb + 1
                 self.pauseCondition = False
         
         self.timeChange = self.timeT #sets the time at which the interruption was made
