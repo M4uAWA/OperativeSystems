@@ -22,6 +22,7 @@ class OperativeSystemApp:
         self.processArr = []
         self.doneArr = []
         self.timeT = 0
+        self.timeChange = 0
         self.flag = False
         self.batchCounter = 0
         self.pauseCondition = False
@@ -237,21 +238,26 @@ class OperativeSystemApp:
                 self.auxProcess.tE = self.auxProcess.met  # Trigger new process assignment
                 
             elif int(key.keycode) == 73:  # INTERRUPTION - I
-                self.auxProcess.tE -= 1
+                if(self.timeChange != self.timeT): #Check if interruption was pressed twice in the same second (prevents decrementing te of a process in readyarr)
+                    self.auxProcess.tE = self.auxProcess.tE - 1
                 self.processArr.append(self.auxProcess) 
                 self.auxProcess = self.processArr.pop(0) #assign process currently being processed and pop previous process from current batch process array
                 
             elif int(key.keycode) == 80:  # PAUSE - P
                 self.lf1.config(text="Paused")
                 self.pauseCondition = True
-                self.timeT -= 1
-                self.auxProcess.tE -= 1
+                if(self.timeChange != self.timeT):
+                    self.timeT -= 1
+                    self.auxProcess.tE -= 1
                 
         if int(key.keycode) == 67:  # CONTINUE - C
             self.lf1.config(text="Processing")
             self.pauseCondition = False
-            self.timeT += 1
-            self.auxProcess.tE += 1
+            if(self.timeChange != self.timeT):
+                self.timeT += 1
+                self.auxProcess.tE += 1
+            
+        self.timeChange = self.timeT #sets the time at which the interruption was made
 
     def updateProcessing(self):
 
