@@ -148,7 +148,7 @@ class OperativeSystemApp:
 
         self.processCapture()
 
-        self.loadingWindow = self.windowFormat() #generating processes window
+        self.loadingWindow = self.windowFormat() #generate processes window
 
         self.lbl = self.labelFormat(self.loadingWindow,"\n\n\n\n\nGenerating New Processes...\n")
         self.lbl.pack()
